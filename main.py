@@ -253,7 +253,9 @@ def mainCycle(): # MAIN PROGRAM CYCLE
             print("")
             if(value==1):
                 while True:
-                    which:str = str(input("If you want to view the expenses grouped by category then please enter 'category'. If not then please enter 'all' : "))
+                    which:str = str(input("If you want to view the expenses grouped by category then please enter 'category'. If not then please enter 'all'. (Enter '!abort' to abort) : "))
+                    if(which == "!abort"):
+                        break
                     if(which.lower() != "category" and which.lower() != "all"):
                         print("\nYou entered a wrong string please try again.\n")
                         continue
