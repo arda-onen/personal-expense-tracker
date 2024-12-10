@@ -181,9 +181,8 @@ def calculateMoney() -> None: # calculates the current money according to the lo
     #making currentMoney global to change its value outside of the function too
     global currentMoney
     for expense in splittedExpenses:
-        splittedText:list[str] = expense
-        money:float = float(splittedText[1]) #getting the price variable from the text as float
-        currentMoney[splittedText[2]] += money; #adding the value to the related categorys value/key
+        money:float = float(expense[1]) #getting the price variable from the text as float
+        currentMoney[expense[2]] += money; #adding the value to the related categorys value/key
 
 def writeTexts( t , firstPos:tuple[float,float] , lastPos:tuple[float,float] , height:float , category:str , margin:float ) -> None: # writes money and category to the bar
     t.penup() # using penup to avoid drawing while changing the position
@@ -255,11 +254,11 @@ def mainCycle(): # MAIN PROGRAM CYCLE
     global splittedBudget
     global splittedExpenses
     expenses = getExpenses() #getting the expenses from expenses.txt
-    calculateMoney() # calculating the money for each category
     budgets = getBudgets() # getting the budgets from budget.txt
     waitForInput(True) # giving it true to avoid input
     splittedExpenses = splitVariables(expenses)
     splittedBudget = splitVariables(budgets)
+    calculateMoney() # calculating the money for each category
     while True: # using while to make the program a cycle
         try:
             print()
