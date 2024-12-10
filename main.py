@@ -13,8 +13,10 @@ WIDTH:int=50
 budgets:list[str]=[] # an array which set at the start of the program and could be changable
 expenses:list[str]=[] # an array which set at the start of the program and gets saved at the end
 
-currentMoney:dict[str,float] = { # A dictionary to store the sum of the money variable in each category
+splittedBudget:list[list[str]] = []
+splittedExpenses:list[list[str]] = []
 
+currentMoney:dict[str,float] = { # A dictionary to store the sum of the money variable in each category
     "Food" : 0.0,
     "Housing": 0.0,
     "Transportation": 0.0,
@@ -85,10 +87,18 @@ def getBudgets() -> list[str]: # returns the budget array from budget.txt
     print("")
     return tempBudget
 
+def splitVariables(liste:list[str]) -> list[list[str]]: #returns the splitted value of the list given
+    temp:list[list[str]] = []
+    for item in liste:
+        temp.append(item.split("\t"))
+    
+    return temp
+
+
 def checkMaxBudget(category:str) -> int: # returns the budget of a specific category
     maxBudget:int = 0
-    for budget in budgets:
-        splittedText:list[str] = budget.split("\t") #splitting the string to parts which 0 is category and 1 is budget
+    for budget in splittedBudget:
+        splittedText:list[str] = budget #splitting the string to parts which 0 is category and 1 is budget
         if(splittedText[0] == category):
             maxBudget = int(splittedText[1].replace("\n","")) #used replace to avoid any problems when converting into int
     return maxBudget
@@ -170,8 +180,8 @@ def calculateMoney() -> None: # calculates the current money according to the lo
     #Please_NOTE THAT this function can only be called at the start!!!!
     #making currentMoney global to change its value outside of the function too
     global currentMoney
-    for expense in expenses:
-        splittedText:list[str] = expense.split("\t")
+    for expense in splittedExpenses:
+        splittedText:list[str] = expense
         money:float = float(splittedText[1]) #getting the price variable from the text as float
         currentMoney[splittedText[2]] += money; #adding the value to the related categorys value/key
 
@@ -241,10 +251,15 @@ def mainCycle(): # MAIN PROGRAM CYCLE
     #making expenses and budgets global to change their values globally
     global expenses
     global budgets
+    #making splitted lists global too to change their values globally
+    global splittedBudget
+    global splittedExpenses
     expenses = getExpenses() #getting the expenses from expenses.txt
     calculateMoney() # calculating the money for each category
     budgets = getBudgets() # getting the budgets from budget.txt
     waitForInput(True) # giving it true to avoid input
+    splittedExpenses = splitVariables(expenses)
+    splittedBudget = splitVariables(budgets)
     while True: # using while to make the program a cycle
         try:
             print()
