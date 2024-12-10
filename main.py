@@ -1,9 +1,9 @@
 # AUTHOR : ARDA ÖNEN
 # CENG 1009 SECTION 2
 
-from datetime import date # using datetime to get today's date
+import datetime # using datetime to get today's date
 import turtle # using turtle to draw chart
-from os import system, name # importing os to clear the terminal for better visual
+from os import system, name # importing system to clear the terminal for better visual and name to understand which OS we are using
 
 #constant values
 CATEGORIES:list[str]=["Food","Housing","Transportation","Education","Entertainment","Shopping","Other"]
@@ -51,15 +51,17 @@ def getExpenses() -> list[str]: # returns the expenses array from expenses.txt
 def createBudgets() -> list[str]: #made this function to avoid writing the same code twice
     tempBudget:list[str] = []
     for category in CATEGORIES: #we are going to create the budget.txt file in this for loop
-        try: 
-            amount: int = int(input("Please enter the amount of budget for the " + category + " category : ")) #getting amount
-            tempBudget.append(category + "\t" + str(amount)+"\n")
-        except ValueError: #avoiding value errors
-            print("\nPlease only enter an integer as a budget.\n")
-            return createBudgets() #using recursive to start all over again
-        except Exception as e: # for any kind of error
-            print("There was an error occured. Please contact support for further information. Error code is : " + str(e))
-            raise e
+        while True:
+            try: 
+                amount: int = int(input("Please enter the amount of budget for the " + category + " category : ")) #getting amount
+                tempBudget.append(category + "\t" + str(amount)+"\n")
+                break
+            except ValueError: #avoiding value errors
+                print("\nPlease only enter an integer as a budget.\n")
+                continue 
+            except Exception as e: # for any kind of error
+                print("There was an error occured. Please contact support for further information. Error code is : " + str(e))
+                continue
     try:
         with open("budget.txt",mode="w") as file: #opening the file in write mode
             file.writelines(tempBudget) # saving the budget.txt file
@@ -108,6 +110,7 @@ def viewAllExpenses() -> None: #shows all the expenses as list
         print("Could not able to find any expenses. Going back to the menu...\n")
         return
     print("All of the expenses are :")
+    print("Date\tAmount\tCategory\tDescription")
     for text in expenses: #getting every expense in expenses
         text = text.replace("\n","") #getting rid of the \n at the end of each text
         print("- " + text)
@@ -216,7 +219,7 @@ def drawBarChart() -> None: # prepares screen and creates turtle object to draw 
 
     wn.exitonclick() # used this to avoid the instant closure after drawing everything
     try:
-         turtle.bye() # we are using bye function to ensure the turtle window is close so that if this function is called again there wont be any errors occured by turtle
+        turtle.bye() # we are using bye function to ensure the turtle window is close so that if this function is called again there wont be any errors occured by turtle
     except:
         pass
 
@@ -225,14 +228,14 @@ def updateBudget()-> list[str]: # updates the budget to the users value
     print("")
     return tempBudget
 
-def waitForInput(bool:bool) -> None: # makes the program more responsive to user by clearing the terminal after every request
+def waitForInput(isFirstTime:bool) -> None: # makes the program more responsive to user by clearing the terminal after every request
     print("Press enter to continue...")
-    if(bool == False):
+    if(isFirstTime == False):
         input() # waiting for enter
     if(name == 'nt'): # if it is windows
         system("cls") # execute code in terminal
     else:
-        system("clear")
+        system("clear") # for linux/mac
 
 def mainCycle(): # MAIN PROGRAM CYCLE
     #making expenses and budgets global to change their values globally
@@ -249,37 +252,80 @@ def mainCycle(): # MAIN PROGRAM CYCLE
             value:int = int(input("\nPlease Select an option    1:View Expenses   2:Search Expenses   3:Add Expense   4:Create Bar Chart of Expenses   5:Update Budget   6:Check for Alerts   7:Exit\nYour choice : "))
             print("")
             if(value==1):
-                which:str = str(input("If you want to view the expenses grouped by category then please enter 'category'. If not then please enter 'all' : "))
-                if(which.lower() != "category" and which.lower() != "all"):
-                    print("\nYou entered a wrong string please try again.\n") #avoiding any errors
-                    waitForInput(False)
-                    continue
-                print("")
-                if(which.lower() == "all"):
-                    viewAllExpenses()
-                elif(which.lower() == "category"):
-                    viewExpenses()
+                while True:
+                    which:str = str(input("If you want to view the expenses grouped by category then please enter 'category'. If not then please enter 'all' : "))
+                    if(which.lower() != "category" and which.lower() != "all"):
+                        print("\nYou entered a wrong string please try again.\n")
+                        continue
+                    print("")
+                    if(which.lower() == "all"):
+                        viewAllExpenses()
+                    elif(which.lower() == "category"):
+                        viewExpenses()
+                    break
             elif(value==2):
                 filter:str = str(input("Please enter the search filter : ")) #getting the filter
                 print("")
                 searchFilter(filter) #search using the filter
             elif(value==3):
-                category:str = str(input("Please enter the category of your expense : ")) # getting the category
-                if(category.capitalize() not in CATEGORIES): # checking if it is valid
-                    print("\nPlease enter a valid category...\n")
+                abort:bool = False 
+                category:str = ""
+                while True and not abort:
+                    try:
+                        category:str = str(input("Please enter the category of your expense (Enter '!abort' to abort) : ")) # getting the category
+                        if(category == "!abort"):
+                            abort = True
+                            break
+                        if(category.capitalize() not in CATEGORIES): # checking if it is valid
+                            raise ValueError
+                        break
+                    except ValueError:
+                        print("\nPlease enter a valid category...\n")
+                        continue
+
+                amount:float = 0
+                while True and not abort:
+                    try:
+                        amount:float = float(input("Please enter the amount of your expense (Enter '-1' to abort) : ")) #getting price
+                        if(amount == -1):
+                            abort = True
+                            break
+                        if(amount<0): #check if it is positive
+                            raise ValueError
+                        break
+                    except ValueError:
+                        print("\nPlease enter a valid amount...\n")
+                        continue
+                description:str = ""
+                while True and not abort:
+                    try:
+                        description:str = str(input("Please enter the description of your expense (Enter '!abort' to abort) : ")) # getting a description
+                        if(description == "!abort"):
+                            abort = True
+                            break
+                        if(description == ""): # checking if it is empty to avoid any errors at split() function
+                            raise ValueError
+                        break
+                    except ValueError:
+                        print("\nPlease enter a valid description\n")
+                        continue
+                transaction_date:datetime.date = None
+                while True and not abort:
+                    try:
+                        date:str = str(input("Please enter the date of your expense ('YYYY-MM-DD') (Enter '!abort' to abort) : ")) # getting the date
+                        if(date == "!abort"):
+                            abort = True
+                            break
+                        transaction_date:datetime = None  # setting the date variable
+                        transaction_date = datetime.datetime.strptime(date, "%Y-%m-%d")
+                        break
+                    except ValueError:
+                        print("Please enter a valid date\n")
+                        continue
+                if(abort):
                     waitForInput(False)
                     continue
-                amount:float = float(input("Please enter the amount of your expense : ")) #getting price
-                if(amount<0): #check if it is positive
-                    print("\nPlease enter a valid amount...\n")
-                    waitForInput(False)
-                    continue
-                description:str = str(input("Please enter the description of your expense : ")) # getting a description
-                if(description == ""): # checking if it is empty to avoid any errors at split() function
-                    print("\nPlease enter a valid description\n")
-                    waitForInput(False)
-                    continue
-                addExpense(category=category.capitalize(),date=str(date.today()),amount=amount,description=description) #adds expense
+                addExpense(category=category.capitalize(),date=str(transaction_date.date()),amount=amount,description=description) #adds expense
             elif(value==4):
                 drawBarChart() # prepare to draw a chart
             elif(value==5):
