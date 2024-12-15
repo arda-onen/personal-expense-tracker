@@ -6,12 +6,12 @@ import turtle # using turtle to draw chart
 from os import system, name # importing system to clear the terminal for better visual and name to understand which OS we are using
 
 #constant variables
-CATEGORIES:list[str]=["Food","Housing","Transportation","Education","Entertainment","Shopping","Other"]
-BORDER:int=10
-WIDTH:int=50
+CATEGORIES:list[str] = ["Food","Housing","Transportation","Education","Entertainment","Shopping","Other"]
+BORDER:int = 10
+WIDTH:int = 50
 
-budgets:list[str]=[] # an array which set at the start of the program and could be changable
-expenses:list[str]=[] # an array which set at the start of the program and gets saved at the end
+budgets:list[str] = [] # an array which set at the start of the program and could be changable
+expenses:list[str] = [] # an array which set at the start of the program and gets saved at the end
 
 splittedBudget:list[list[str]] = []
 splittedExpenses:list[list[str]] = []
@@ -154,14 +154,18 @@ def searchFilter( search:str ) -> None: # prints the search results according to
         print("Could not find any results...")
     print("")
 
-def exit() -> None: # saves expenses.txt with the data expenses array
-    print("Saving the changes...")
+def saveChanges() -> None: # save the expenses.txt file
     try:
         with open("expenses.txt",mode="w") as file: #opening expenses file to save the changes
             file.writelines(expenses) # writing expenses array to the file
             print("Expenses successfully saved to the system.")
     except:
         print("There was an error occured when saving your expenses. Please contact support.\n")
+
+def exit() -> None: # call save function
+    print("Saving the changes...")
+    saveChanges()
+    print("Exiting...")
         
 def notifyUser( category:str , amount:float ) -> None: # prints a notification according to the variables given
     #format used for clean code
@@ -247,7 +251,7 @@ def waitForInput(isFirstTime:bool) -> None: # makes the program more responsive 
     else:
         system("clear") # for linux/mac
 
-def setBudgetDict() -> None:
+def setBudgetDict() -> None: # changes the values of the Budget dict
     global currentBudget
     for budget in splittedBudget:
         currentBudget[budget[0]] = int(budget[1])
@@ -354,18 +358,18 @@ def mainCycle(): # MAIN PROGRAM CYCLE
                 drawBarChart() # prepare to draw a chart
             elif(value==5):
                 budgets = updateBudget() # overwriting or creating a budget.txt file
-                splittedBudget = splitVariables(budgets)
-                setBudgetDict()
+                splittedBudget = splitVariables(budgets) # splitting the budget again to avoid confusion
+                setBudgetDict() # setting the budget dictionary again
             elif(value==6):
                 checkAlerts() # check if there are some alerts because of the budget
             elif(value==7):
                 break # to exit to program we are calling a break to while
             else:
                 print("Please enter one of the given options...\n")
-        except ValueError: # covering all inputs value errors
+        except ValueError: # covering all value errors
             print("\nPlease enter a valid value\n")
         except:
-            print("There was an error occured. Please contact support for further information.")
+            print("\nThere was an error occured. Please contact support for further information.\n")
             break
         waitForInput(False)
     exit() # save and quit
