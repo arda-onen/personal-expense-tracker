@@ -1,11 +1,11 @@
 # AUTHOR : ARDA ÖNEN
 # CENG 1009 SECTION 2
 
-import datetime # using datetime to get today's date
+import datetime # using datetime to check if a date is valid or not
 import turtle # using turtle to draw chart
 from os import system, name # importing system to clear the terminal for better visual and name to understand which OS we are using
 
-#constant values
+#constant variables
 CATEGORIES:list[str]=["Food","Housing","Transportation","Education","Entertainment","Shopping","Other"]
 BORDER:int=10
 WIDTH:int=50
@@ -24,6 +24,15 @@ currentMoney:dict[str,float] = { # A dictionary to store the sum of the money va
     "Entertainment":0.0,
     "Shopping":0.0,
     "Other":0.0
+}
+currentBudget:dict[str,int] = { # A dictionary to store the budget of the person
+    "Food" : 0,
+    "Housing": 0,
+    "Transportation": 0,
+    "Education": 0,
+    "Entertainment":0,
+    "Shopping":0,
+    "Other":0
 }
 
 # Please note that try is used to handle all the error parts in the program
@@ -47,7 +56,6 @@ def getExpenses() -> list[str]: # returns the expenses array from expenses.txt
         print("Could not able to find any expenses. Welcome to the Personal Expense tracker!")
     except Exception as e: # for any kind of error
         print("There was an error occured. Please contact support for further information. Error code is : " + str(e))
-        raise e
     return tempExpenses
 
 def createBudgets() -> list[str]: #made this function to avoid writing the same code twice
@@ -94,14 +102,8 @@ def splitVariables(liste:list[str]) -> list[list[str]]: #returns the splitted va
     
     return temp
 
-
 def checkMaxBudget(category:str) -> int: # returns the budget of a specific category
-    maxBudget:int = 0
-    for budget in splittedBudget:
-        splittedText:list[str] = budget #splitting the string to parts which 0 is category and 1 is budget
-        if(splittedText[0] == category):
-            maxBudget = int(splittedText[1].replace("\n","")) #used replace to avoid any problems when converting into int
-    return maxBudget
+    return currentBudget[category]
 
 def addExpense(date:str,amount:float,category:str,description:str) -> None: # appends a new expense to expenses array
     #making currentMoney variable global because we are going to update its values to use it in other functions
@@ -133,9 +135,9 @@ def viewExpenses() -> None: #shows all the expenses by category
     for category in CATEGORIES: 
         isData:bool = False # this variable is used to know that if there is any data avaiable in the category
         print("****", category,"****\n")
-        for expense in expenses:
-            if(expense.split("\t")[2] == category): #used split to get all 4 variables of the text
-                print("- " + expense.replace("\n","")) 
+        for expense in splittedExpenses:
+            if(expense[2] == category):
+                print("- " + "\t".join(expense).replace("\n",""))
                 isData = True # setting true to let the program know that this category is not empty
         if(isData == False): #check if this category is empty or not
             print("Unable to find any data in this category...")
@@ -144,10 +146,9 @@ def viewExpenses() -> None: #shows all the expenses by category
 def searchFilter( search:str ) -> None: # prints the search results according to the description and category
     isFound:bool = False # this variable is used to let the program uunderstand that is there are data or not
     print("Search results for '" + search + "' are : ")
-    for expense in expenses:
-        expenseDetails:list[str] = expense.split("\t")
-        if(search.lower() in (expenseDetails[2].lower() + expenseDetails[3].lower())): # using lower to avoid any uppercase misunderstandings
-            print("- " + expense.replace("\n",""))
+    for expense in splittedExpenses:
+        if(search.lower() in (expense[2].lower() + expense[3].lower())): # using lower to avoid any uppercase misunderstandings
+            print("- " + "\t".join(expense).replace("\n",""))
             isFound = True # there is data!
     if(isFound == False): # check if there are any results
         print("Could not find any results...")
@@ -187,7 +188,7 @@ def calculateMoney() -> None: # calculates the current money according to the lo
 def writeTexts( t , firstPos:tuple[float,float] , lastPos:tuple[float,float] , height:float , category:str , margin:float ) -> None: # writes money and category to the bar
     t.penup() # using penup to avoid drawing while changing the position
     t.goto(firstPos[0],firstPos[1]+BORDER) # using goto with a margin of BORDER at y axis
-    t.write(height) # writing money value
+    t.write(str(height) + " / " + str(currentBudget[category])) # writing money value
     t.goto(lastPos[0] - WIDTH, lastPos[1] - margin) # using goto with a margin of WIDTH at x and margin at y axis
     t.write(category) # writing category
     t.goto(lastPos) # using goto to return to original position
@@ -246,6 +247,11 @@ def waitForInput(isFirstTime:bool) -> None: # makes the program more responsive 
     else:
         system("clear") # for linux/mac
 
+def setBudgetDict() -> None:
+    global currentBudget
+    for budget in splittedBudget:
+        currentBudget[budget[0]] = int(budget[1])
+
 def mainCycle(): # MAIN PROGRAM CYCLE
     #making expenses and budgets global to change their values globally
     global expenses
@@ -258,7 +264,9 @@ def mainCycle(): # MAIN PROGRAM CYCLE
     waitForInput(True) # giving it true to avoid input
     splittedExpenses = splitVariables(expenses)
     splittedBudget = splitVariables(budgets)
+    setBudgetDict() # sets the values to the dictionary
     calculateMoney() # calculating the money for each category
+    
     while True: # using while to make the program a cycle
         try:
             print()
@@ -346,6 +354,8 @@ def mainCycle(): # MAIN PROGRAM CYCLE
                 drawBarChart() # prepare to draw a chart
             elif(value==5):
                 budgets = updateBudget() # overwriting or creating a budget.txt file
+                splittedBudget = splitVariables(budgets)
+                setBudgetDict()
             elif(value==6):
                 checkAlerts() # check if there are some alerts because of the budget
             elif(value==7):
