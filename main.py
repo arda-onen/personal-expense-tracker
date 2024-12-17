@@ -98,8 +98,8 @@ def getBudgets() -> list[str]: # returns the budget array from budget.txt
 def splitVariables(liste:list[str]) -> list[list[str]]: #returns the splitted value of the list given
     temp:list[list[str]] = []
     for item in liste:
-        temp.append(item.split("\t"))
-    
+        item = item.strip() # using strip to avoid any errors that could be caused because of whitespaces
+        temp.append(item.split("\t")) 
     return temp
 
 def checkMaxBudget(category:str) -> int: # returns the budget of a specific category
@@ -275,7 +275,7 @@ def mainCycle(): # MAIN PROGRAM CYCLE
         try:
             print()
             print("ARDA ONEN's PERSONAL EXPENSE TRACKER SYSTEM".center(200,"*"))
-            value:int = int(input("\nPlease Select an option    1:View Expenses   2:Search Expenses   3:Add Expense   4:Create Bar Chart of Expenses   5:Update Budget   6:Check for Alerts   7:Exit\nYour choice : "))
+            value:int = int(input("\nPlease Select an option    1:View Expenses   2:Search Expenses   3:Add Expense   4:Create Bar Chart of Expenses   5:Update Budget   6:Check for Alerts   7:Save Expenses   8:Exit\nYour choice : "))
             print("")
             if(value==1):
                 while True:
@@ -363,6 +363,8 @@ def mainCycle(): # MAIN PROGRAM CYCLE
             elif(value==6):
                 checkAlerts() # check if there are some alerts because of the budget
             elif(value==7):
+                saveChanges()
+            elif(value==8):
                 break # to exit to program we are calling a break to while
             else:
                 print("Please enter one of the given options...\n")
