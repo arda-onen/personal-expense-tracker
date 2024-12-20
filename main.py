@@ -300,6 +300,8 @@ def mainCycle(): # MAIN PROGRAM CYCLE
                 category:str = ""
                 while True and not abort:
                     try:
+                        for category in CATEGORIES:
+                            print(" - " + category)
                         category:str = str(input("Please enter the category of your expense (Enter '!abort' to abort) : ")) # getting the category
                         if(category == "!abort"):
                             abort = True
@@ -310,7 +312,6 @@ def mainCycle(): # MAIN PROGRAM CYCLE
                     except ValueError:
                         print("\nPlease enter a valid category...\n")
                         continue
-
                 amount:float = 0
                 while True and not abort:
                     try:
