@@ -355,6 +355,7 @@ def mainCycle(): # MAIN PROGRAM CYCLE
                     waitForInput(False)
                     continue
                 addExpense(category=category.capitalize(),date=str(transaction_date.date()),amount=amount,description=description) #adds expense
+                splittedExpenses = splitVariables(expenses)
             elif(value==4):
                 drawBarChart() # prepare to draw a chart
             elif(value==5):
