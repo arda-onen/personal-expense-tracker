@@ -27,10 +27,14 @@ currentBudget:dict[str,int] = { } # A dictionary to store the budget of the pers
 
 def saveBudgets() -> None:
     try:
+        temp =  []
+        for category in CATEGORIES:
+            temp.append(category + "\t" + str(currentBudget[category]) + "\n")
+
         with open("budget.txt","w") as file:
-            for category in CATEGORIES:
-                file.write(category + "\t" + str(currentBudget[category]) + "\n")
+            file.writelines(temp)
     except:
+        print("An error occured")
         pass
 
 def setupDicts() -> None: # sets all of the dictionaries with given categories
@@ -260,6 +264,7 @@ def setBudgetDict() -> None: # changes the values of the Budget dict
 
 def getCategories() -> None:
     global CATEGORIES
+    CATEGORIES = []
     for budget in splittedBudget:
         CATEGORIES.append(budget[0])
 
@@ -492,7 +497,8 @@ def mainCycle(): # MAIN PROGRAM CYCLE
                 print("Please enter one of the given options...\n")
         except ValueError: # covering all value errors
             print("\nPlease enter a valid value\n")
-
+        except Exception as e:
+            print("There was an error occured. Please contact support for further help. Exception : ",e)
         waitForInput(False)
     exit() # save and quit
 
