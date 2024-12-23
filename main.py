@@ -319,7 +319,7 @@ def deleteCategory() -> None:
     global currentBudget
     global currentMoney
     while True:
-
+        try:
             print("All categories are : \n")    
             for category in CATEGORIES:
                 print(category)
@@ -341,6 +341,8 @@ def deleteCategory() -> None:
 
             print("Successfully deleted the category from the system. All of the expenses in this category is deleted as well.")
             break
+        except:
+            print("\nPlease try again...\n")
 
 def deleteExpense() -> None:
     global currentMoney
@@ -415,14 +417,8 @@ def mainCycle(): # MAIN PROGRAM CYCLE
                             abort = True
                             break
                         if(category.capitalize() not in CATEGORIES): # checking if it is valid
-                            number = input("This category does not exist. Do you want to create it (Y:yes , N: No) :")
-                            if(number.lower() == "y"):
-                                categoryBudget = int(input("Please enter the budget for " + category.capitalize()))
-                                if(categoryBudget < 0):
-                                    raise ValueError
-                                addCategory(categoryName=category.capitalize(),categoryBudget=categoryBudget)
-                            else:
-                                continue
+                            print("Please create the category first to add an expense.")
+                            continue
                         break
                     except ValueError:
                         print("\nPlease enter a valid category...\n")
