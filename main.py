@@ -25,12 +25,11 @@ currentBudget:dict[str,int] = { } # A dictionary to store the budget of the pers
 # Example => there could be a problem at reading the file and in that situation the file may be forgotten open due to error. 
 # Using with deals with that problem because it automatically closes the file upon COMPLETION or FAILURE.
 
-def saveBudgets() -> None:
+def saveBudgets() -> None: # this function saves all budgets from dictionary to txt file
     try:
         temp =  []
         for category in CATEGORIES:
             temp.append(category + "\t" + str(currentBudget[category]) + "\n")
-
         with open("budget.txt","w") as file:
             file.writelines(temp)
     except:
@@ -262,13 +261,14 @@ def setBudgetDict() -> None: # changes the values of the Budget dict
     for budget in splittedBudget:
         currentBudget[budget[0]] = int(budget[1])
 
-def getCategories() -> None:
+def getCategories() -> None: # this function gets all of the categories that user created at the start of the program
     global CATEGORIES
     CATEGORIES = []
     for budget in splittedBudget:
         CATEGORIES.append(budget[0])
 
-def addCategory() -> None:
+def addCategory() -> None: # this function adds category to CATEGORIES, currentBudget and currentMoney
+    #making variables global to change theirs value globally
     global CATEGORIES
     global currentBudget
     global currentMoney
@@ -296,10 +296,8 @@ def addCategory() -> None:
             CATEGORIES.append(categoryName)
             currentBudget[categoryName] = categoryBudget
             currentMoney[categoryName] = 0
-            
-            saveBudgets()
 
-                
+            saveBudgets()
             print("Category added successfully...")
             break
         except:
@@ -312,14 +310,14 @@ def viewBudgets() -> None: # prints the currentMoney and currentBudget for all c
         print(category + "\t" + str(currentMoney[category]) + "/" + str(currentBudget[category]))
     print("")
 
-def deleteCategory() -> None:
+def deleteCategory() -> None: # this function deletes the category from CATEGORIES, currentBudget and currentMoney. it also deletes the expenses of the category
     global CATEGORIES
     global expenses
     global splittedExpenses
     global currentBudget
     global currentMoney
     while True:
-        try:
+            
             print("All categories are : \n")    
             for category in CATEGORIES:
                 print(category)
@@ -331,20 +329,25 @@ def deleteCategory() -> None:
             if(categoryName not in CATEGORIES):
                 raise ValueError
             
+            deletes = []
+
             for i in range(0,len(splittedExpenses)):
                 if(splittedExpenses[i][2] == categoryName):
-                    del expenses[i]
+                    deletes.append(expenses[i])
+            
+            for delete in deletes:
+                expenses.remove(delete)
 
             del currentMoney[categoryName]
             del currentBudget[categoryName]
             CATEGORIES.remove(categoryName)
 
+            saveBudgets()
             print("Successfully deleted the category from the system. All of the expenses in this category is deleted as well.")
             break
-        except:
-            print("\nPlease try again...\n")
 
-def deleteExpense() -> None:
+
+def deleteExpense() -> None: # this function deletes the selected expense and substracts the amount from currentMoney.
     global currentMoney
     global expenses
     global splittedExpenses
@@ -483,12 +486,12 @@ def mainCycle(): # MAIN PROGRAM CYCLE
                 viewBudgets()
             elif(value==10):
                 deleteExpense()
-                splittedExpenses = splitVariables(expenses)
+                splittedExpenses = splitVariables(expenses) # splitting again
             elif(value==11):
                 deleteCategory()
-                splittedExpenses = splitVariables(expenses)
+                splittedExpenses = splitVariables(expenses) # splitting again
             elif(value==12):
-                break # to exit to program we are calling a break to while
+                break # to exit to program
             else:
                 print("Please enter one of the given options...\n")
         except ValueError: # covering all value errors
