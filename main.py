@@ -263,20 +263,43 @@ def getCategories() -> None:
     for budget in splittedBudget:
         CATEGORIES.append(budget[0])
 
-def addCategory(categoryName:str,categoryBudget:int) -> None:
-    try:
-        global CATEGORIES
-        global currentBudget
-        global currentMoney
-        if(categoryName in CATEGORIES):
-            raise Exception
-        CATEGORIES.append(categoryName)
-        currentBudget[categoryName] = categoryBudget
-        currentMoney[categoryName] = 0
-        
-        saveBudgets()
-    except:
-        print("There was an error occured...")
+def addCategory() -> None:
+    global CATEGORIES
+    global currentBudget
+    global currentMoney
+    while True:
+        try:
+            categoryName = input("Please enter the name of the category you want to add (Enter '!abort' to abort) : ")
+            if(categoryName == "!abort"):
+                break
+            categoryName = categoryName.capitalize()
+            if(categoryName == ""):
+                print("\nPlease enter a string...\n")
+                continue
+            if(categoryName in CATEGORIES):
+                print("\nPlease enter a non-existing category\n")
+                continue
+            categoryBudget = int(input("Please enter the budget of " + categoryName + " (Enter '-1' to abort) : "))
+            if(categoryBudget == -1):
+                break
+            if(categoryBudget < 0):
+                print("\nPlease enter a positive number\n")
+                continue
+
+            if(categoryName in CATEGORIES):
+                raise Exception
+            CATEGORIES.append(categoryName)
+            currentBudget[categoryName] = categoryBudget
+            currentMoney[categoryName] = 0
+            
+            saveBudgets()
+
+                
+            print("Category added successfully...")
+            break
+        except:
+            print("Please try again...")
+            continue
 
 def viewBudgets() -> None: # prints the currentMoney and currentBudget for all categories
     print("Your Sum Is :")
@@ -454,30 +477,7 @@ def mainCycle(): # MAIN PROGRAM CYCLE
             elif(value==7):
                 saveChanges()
             elif(value==8):
-                while True:
-                    try:
-                        categoryName = input("Please enter the name of the category you want to add (Enter '!abort' to abort) : ")
-                        if(categoryName == "!abort"):
-                            break
-                        categoryName = categoryName.capitalize()
-                        if(categoryName == ""):
-                            print("\nPlease enter a string...\n")
-                            continue
-                        if(categoryName in CATEGORIES):
-                            print("\nPlease enter a non-existing category\n")
-                            continue
-                        categoryBudget = int(input("Please enter the budget of " + categoryName + " (Enter '-1' to abort) : "))
-                        if(categoryBudget == -1):
-                            break
-                        if(categoryBudget < 0):
-                            print("\nPlease enter a positive number\n")
-                            continue
-                        addCategory(categoryName=categoryName, categoryBudget=categoryBudget)
-                        print("Category added successfully...")
-                        break
-                    except:
-                        print("Please try again...")
-                        continue
+                addCategory()
             elif(value==9):
                 viewBudgets()
             elif(value==10):
