@@ -25,6 +25,14 @@ currentBudget:dict[str,int] = { } # A dictionary to store the budget of the pers
 # Example => there could be a problem at reading the file and in that situation the file may be forgotten open due to error. 
 # Using with deals with that problem because it automatically closes the file upon COMPLETION or FAILURE.
 
+def saveBudgets() -> None:
+    try:
+        with open("budget.txt","w") as file:
+            for category in CATEGORIES:
+                file.write(category + "\t" + str(currentBudget[category]) + "\n")
+    except:
+        pass
+
 def setupDicts() -> None: # sets all of the dictionaries with given categories
     global currentBudget
     global currentMoney
@@ -266,16 +274,65 @@ def addCategory(categoryName:str,categoryBudget:int) -> None:
         currentBudget[categoryName] = categoryBudget
         currentMoney[categoryName] = 0
         
-        with open("budget.txt","a") as file:
-            file.write(categoryName + "\t" + str(categoryBudget)+"\n")
+        saveBudgets()
     except:
         print("There was an error occured...")
 
-def viewBudgets() -> None:
-    print("Your Budgets are :")
+def viewBudgets() -> None: # prints the currentMoney and currentBudget for all categories
+    print("Your Sum Is :")
     for category in CATEGORIES:
-        print(category + "\t" + str(currentBudget[category]))
+        print(category + "\t" + str(currentMoney[category]) + "/" + str(currentBudget[category]))
     print("")
+
+def deleteCategory() -> None:
+    global CATEGORIES
+    global expenses
+    global splittedExpenses
+    global currentBudget
+    global currentMoney
+    while True:
+
+            print("All categories are : \n")    
+            for category in CATEGORIES:
+                print(category)
+            print("\nPlease note that deleting a category will also remove all expenses in that category!!!")
+            categoryName = input("Please enter the name of the category that you want to delete (Enter '!abort' to abort) : ")
+            if(categoryName == "!abort"):
+                break
+            categoryName = categoryName.capitalize()
+            if(categoryName not in CATEGORIES):
+                raise ValueError
+            
+            for i in range(0,len(splittedExpenses)):
+                if(splittedExpenses[i][2] == categoryName):
+                    del expenses[i]
+
+            del currentMoney[categoryName]
+            del currentBudget[categoryName]
+            CATEGORIES.remove(categoryName)
+
+            print("Successfully deleted the category from the system. All of the expenses in this category is deleted as well.")
+            break
+
+def deleteExpense() -> None:
+    global currentMoney
+    global expenses
+    global splittedExpenses
+    while True:
+        try:
+            print("All of your expenses are numbered : ")
+            for i in range(len(expenses)):
+                print(str(i+1) + " - " + expenses[i],end="")
+            number = int(input("Please enter the number of the expense that you want to delete (Enter '0' to abort) : "))
+            if(number == 0):
+                break
+            currentMoney[splittedExpenses[number-1][2]] -= float(splittedExpenses[number-1][1])
+            del expenses[number-1]
+            print("Successfully deleted the expense...")
+            break
+        except:
+            print("\nPlease try again...\n")
+            continue
 
 def mainCycle(): # MAIN PROGRAM CYCLE
     #making expenses and budgets global to change their values globally
@@ -298,7 +355,7 @@ def mainCycle(): # MAIN PROGRAM CYCLE
         try:
             print()
             print("ARDA ONEN's PERSONAL EXPENSE TRACKER SYSTEM".center(200,"*"))
-            value:int = int(input("\nPlease Select an option\n\n1:View Expenses\n2:Search Expenses\n3:Add Expense\n4:Create Bar Chart of Expenses\n5:Update Budget\n6:Check for Alerts\n7:Save Expenses\n8:Add Category\n9:View Budgets For All Categories\n10:Exit\n\nYour choice : "))
+            value:int = int(input("\nPlease Select an option\n\n1:View Expenses\n2:Search Expenses\n3:Add Expense\n4:Create Bar Chart of Expenses\n5:Update Budget\n6:Check for Alerts\n7:Save Expenses\n8:Add Category\n9:View Sum of Expenses For All Categories\n10:Delete Expense\n11:Delete Category\n12:Exit\n\nYour choice : "))
             print("")
             if(value==1):
                 while True:
@@ -399,26 +456,37 @@ def mainCycle(): # MAIN PROGRAM CYCLE
             elif(value==8):
                 while True:
                     try:
-                        categoryName = input("Please enter the name of the category you want to add : ").capitalize()
+                        categoryName = input("Please enter the name of the category you want to add (Enter '!abort' to abort) : ")
+                        if(categoryName == "!abort"):
+                            break
+                        categoryName = categoryName.capitalize()
                         if(categoryName == ""):
                             print("\nPlease enter a string...\n")
                             continue
                         if(categoryName in CATEGORIES):
                             print("\nPlease enter a non-existing category\n")
                             continue
-                        categoryBudget = int(input("Please enter the budget of " + categoryName))
+                        categoryBudget = int(input("Please enter the budget of " + categoryName + " (Enter '-1' to abort) : "))
+                        if(categoryBudget == -1):
+                            break
                         if(categoryBudget < 0):
                             print("\nPlease enter a positive number\n")
                             continue
                         addCategory(categoryName=categoryName, categoryBudget=categoryBudget)
+                        print("Category added successfully...")
                         break
                     except:
                         print("Please try again...")
                         continue
-                print("Category added successfully...")
             elif(value==9):
                 viewBudgets()
             elif(value==10):
+                deleteExpense()
+                splittedExpenses = splitVariables(expenses)
+            elif(value==11):
+                deleteCategory()
+                splittedExpenses = splitVariables(expenses)
+            elif(value==12):
                 break # to exit to program we are calling a break to while
             else:
                 print("Please enter one of the given options...\n")
