@@ -6,7 +6,7 @@ import turtle # using turtle to draw chart
 from os import system, name # importing system to clear the terminal for better visual and name to understand which OS we are using
 
 #constant variables
-CATEGORIES:list[str] = ["Food","Housing","Transportation","Education","Entertainment","Shopping","Other"]
+CATEGORIES:list[str] = []
 BORDER:int = 10
 WIDTH:int = 50
 
@@ -16,30 +16,21 @@ expenses:list[str] = [] # an array which set at the start of the program and get
 splittedBudget:list[list[str]] = []
 splittedExpenses:list[list[str]] = []
 
-currentMoney:dict[str,float] = { # A dictionary to store the sum of the money variable in each category
-    "Food" : 0.0,
-    "Housing": 0.0,
-    "Transportation": 0.0,
-    "Education": 0.0,
-    "Entertainment":0.0,
-    "Shopping":0.0,
-    "Other":0.0
-}
-currentBudget:dict[str,int] = { # A dictionary to store the budget of the person
-    "Food" : 0,
-    "Housing": 0,
-    "Transportation": 0,
-    "Education": 0,
-    "Entertainment":0,
-    "Shopping":0,
-    "Other":0
-}
+currentMoney:dict[str,float] = { } # A dictionary to store the sum of the money variable in each category
+currentBudget:dict[str,int] = { } # A dictionary to store the budget of the person
 
 # Please note that try is used to handle all the error parts in the program
 
 # Used with to avoid any problems may occur at closing the file
 # Example => there could be a problem at reading the file and in that situation the file may be forgotten open due to error. 
 # Using with deals with that problem because it automatically closes the file upon COMPLETION or FAILURE.
+
+def setupDicts() -> None: # sets all of the dictionaries with given categories
+    global currentBudget
+    global currentMoney
+    for category in CATEGORIES:
+        currentBudget[category] = 0
+        currentMoney[category] = 0.0
 
 def getExpenses() -> list[str]: # returns the expenses array from expenses.txt
     tempExpenses:list[str] = []
@@ -59,7 +50,10 @@ def getExpenses() -> list[str]: # returns the expenses array from expenses.txt
     return tempExpenses
 
 def createBudgets() -> list[str]: #made this function to avoid writing the same code twice
+    global CATEGORIES
     tempBudget:list[str] = []
+    if(CATEGORIES == []):
+        CATEGORIES = ["Food","Housing","Transportation","Education","Entertainment","Shopping","Other"]
     for category in CATEGORIES: #we are going to create the budget.txt file in this for loop
         while True:
             try: 
@@ -189,7 +183,7 @@ def calculateMoney() -> None: # calculates the current money according to the lo
         money:float = float(expense[1]) #getting the price variable from the text as float
         currentMoney[expense[2]] += money; #adding the value to the related categorys value/key
 
-def writeTexts( t , firstPos:tuple[float,float] , lastPos:tuple[float,float] , height:float , category:str , margin:float ) -> None: # writes money and category to the bar
+def writeTexts( t:turtle.Turtle , firstPos:tuple[float,float] , lastPos:tuple[float,float] , height:float , category:str , margin:float ) -> None: # writes money and category to the bar
     t.penup() # using penup to avoid drawing while changing the position
     t.goto(firstPos[0],firstPos[1]+BORDER) # using goto with a margin of BORDER at y axis
     t.write(str(height) + " / " + str(currentBudget[category])) # writing money value
@@ -198,7 +192,7 @@ def writeTexts( t , firstPos:tuple[float,float] , lastPos:tuple[float,float] , h
     t.goto(lastPos) # using goto to return to original position
     t.pendown() #letting turtle to draw again
 
-def drawBar( t , height:float , category:str , margin:float ) -> None: # draws the bar for the given category
+def drawBar( t:turtle.Turtle , height:float , category:str , margin:float ) -> None: # draws the bar for the given category
     t.begin_fill() #begin to fill
     t.left(90)
     t.forward(height) 
@@ -256,6 +250,33 @@ def setBudgetDict() -> None: # changes the values of the Budget dict
     for budget in splittedBudget:
         currentBudget[budget[0]] = int(budget[1])
 
+def getCategories() -> None:
+    global CATEGORIES
+    for budget in splittedBudget:
+        CATEGORIES.append(budget[0])
+
+def addCategory(categoryName:str,categoryBudget:int) -> None:
+    try:
+        global CATEGORIES
+        global currentBudget
+        global currentMoney
+        if(categoryName in CATEGORIES):
+            raise Exception
+        CATEGORIES.append(categoryName)
+        currentBudget[categoryName] = categoryBudget
+        currentMoney[categoryName] = 0
+        
+        with open("budget.txt","a") as file:
+            file.write(categoryName + "\t" + str(categoryBudget)+"\n")
+    except:
+        print("There was an error occured...")
+
+def viewBudgets() -> None:
+    print("Your Budgets are :")
+    for category in CATEGORIES:
+        print(category + "\t" + str(currentBudget[category]))
+    print("")
+
 def mainCycle(): # MAIN PROGRAM CYCLE
     #making expenses and budgets global to change their values globally
     global expenses
@@ -268,6 +289,8 @@ def mainCycle(): # MAIN PROGRAM CYCLE
     waitForInput(True) # giving it true to avoid input
     splittedExpenses = splitVariables(expenses)
     splittedBudget = splitVariables(budgets)
+    getCategories()
+    setupDicts()
     setBudgetDict() # sets the values to the dictionary
     calculateMoney() # calculating the money for each category
     
@@ -275,7 +298,7 @@ def mainCycle(): # MAIN PROGRAM CYCLE
         try:
             print()
             print("ARDA ONEN's PERSONAL EXPENSE TRACKER SYSTEM".center(200,"*"))
-            value:int = int(input("\nPlease Select an option    1:View Expenses   2:Search Expenses   3:Add Expense   4:Create Bar Chart of Expenses   5:Update Budget   6:Check for Alerts   7:Save Expenses   8:Exit\nYour choice : "))
+            value:int = int(input("\nPlease Select an option\n\n1:View Expenses\n2:Search Expenses\n3:Add Expense\n4:Create Bar Chart of Expenses\n5:Update Budget\n6:Check for Alerts\n7:Save Expenses\n8:Add Category\n9:View Budgets For All Categories\n10:Exit\n\nYour choice : "))
             print("")
             if(value==1):
                 while True:
@@ -307,7 +330,14 @@ def mainCycle(): # MAIN PROGRAM CYCLE
                             abort = True
                             break
                         if(category.capitalize() not in CATEGORIES): # checking if it is valid
-                            raise ValueError
+                            number = input("This category does not exist. Do you want to create it (Y:yes , N: No) :")
+                            if(number.lower() == "y"):
+                                categoryBudget = int(input("Please enter the budget for " + category.capitalize()))
+                                if(categoryBudget < 0):
+                                    raise ValueError
+                                addCategory(categoryName=category.capitalize(),categoryBudget=categoryBudget)
+                            else:
+                                continue
                         break
                     except ValueError:
                         print("\nPlease enter a valid category...\n")
@@ -367,14 +397,34 @@ def mainCycle(): # MAIN PROGRAM CYCLE
             elif(value==7):
                 saveChanges()
             elif(value==8):
+                while True:
+                    try:
+                        categoryName = input("Please enter the name of the category you want to add : ").capitalize()
+                        if(categoryName == ""):
+                            print("\nPlease enter a string...\n")
+                            continue
+                        if(categoryName in CATEGORIES):
+                            print("\nPlease enter a non-existing category\n")
+                            continue
+                        categoryBudget = int(input("Please enter the budget of " + categoryName))
+                        if(categoryBudget < 0):
+                            print("\nPlease enter a positive number\n")
+                            continue
+                        addCategory(categoryName=categoryName, categoryBudget=categoryBudget)
+                        break
+                    except:
+                        print("Please try again...")
+                        continue
+                print("Category added successfully...")
+            elif(value==9):
+                viewBudgets()
+            elif(value==10):
                 break # to exit to program we are calling a break to while
             else:
                 print("Please enter one of the given options...\n")
         except ValueError: # covering all value errors
             print("\nPlease enter a valid value\n")
-        except:
-            print("\nThere was an error occured. Please contact support for further information.\n")
-            break
+
         waitForInput(False)
     exit() # save and quit
 
