@@ -50,7 +50,12 @@ def getExpenses() -> list[str]: # returns the expenses array from expenses.txt
         # We are opening the file using with to avoid any errors that could occur awhile closing the file process.    
         with open('expenses.txt',mode='r') as file: # Mode is selected as 'r' to read the file.
             tempExpenses = file.readlines() # getting the data from our expenses.txt file
-            if(tempExpenses == []): #checking if the file is empty
+            isEmpty = True
+            for line in tempExpenses:
+                if(line.strip() != "\n" and line.strip() != ""):
+                    isEmpty = False
+                    break
+            if(isEmpty): #checking if the file is empty
                 raise FileNotFoundError
             
             if("\n" not in tempExpenses[-1]): #checking if there is \n at the end of the string to avoid errors at future
@@ -93,7 +98,12 @@ def getBudgets() -> list[str]: # returns the budget array from budget.txt
     try:
         with open('budget.txt',mode='r') as file: #opening budget.txt file
             tempBudget = file.readlines() #reading file
-            if(tempBudget == []): #if file is empty
+            isEmpty = True
+            for line in tempBudget:
+                if(line.strip() != "\n" and line.strip() != ""):
+                    isEmpty = False
+                    break
+            if(isEmpty): #if file is empty
                 raise FileNotFoundError
     except FileNotFoundError:
         print("Could not able to find budgets. Lets create some budgets for all the categories.")
@@ -404,7 +414,7 @@ def mainCycle(): # MAIN PROGRAM CYCLE
             calculateMoney() # calculating the money for each category
             break # if all things are ok, program will continue to the other while loop
         except Exception as e:
-            print("\nThere was an error occured. Error is :",e,"\n")
+            print("\nThere was an error occured while initializing the program. Error is :",e,"\n")
             waitForInput(False)
     while True: # using while to make the program a cycle
         try:
