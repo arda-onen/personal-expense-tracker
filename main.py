@@ -5,8 +5,9 @@ import datetime # using datetime to check if a date is valid or not
 import turtle # using turtle to draw chart
 from os import system, name # importing system to clear the terminal for better visual and name to understand which OS we are using
 
-#constant variables
+
 CATEGORIES:list[str] = []
+#constant variables
 BORDER:int = 10
 WIDTH:int = 50
 
@@ -100,10 +101,18 @@ def getBudgets() -> list[str]: # returns the budget array from budget.txt
     print("")
     return tempBudget
 
+def checkWhitespaces(liste:list[str]) -> list[str]: # returns a string list that is stripped
+    tempList:list[str] = []
+    for item in liste:
+        item = item.strip(" ")
+        if(item == "\n"):
+            continue
+        tempList.append(item)
+    return tempList
+
 def splitVariables(liste:list[str]) -> list[list[str]]: #returns the splitted value of the list given
     temp:list[list[str]] = []
     for item in liste:
-        item = item.strip() # using strip to avoid any errors that could be caused because of whitespaces
         temp.append(item.split("\t")) 
     return temp
 
@@ -180,9 +189,13 @@ def checkAlerts() -> None: # checks if there are any alerts to show
     isAlert:bool = False # to let the program know is there any alerts to show
     for category in CATEGORIES:
         maxBudget:int = checkMaxBudget(category=category) # getting the budget of this category
-        if(currentMoney[category] > maxBudget and maxBudget != 0): # check if it is higher than the budget
-            notifyUser(category=category,amount=float(currentMoney[category] - maxBudget)) # give an alert text
+        money = currentMoney[category]
+        if(money > maxBudget and maxBudget != 0): # check if it is higher than the budget
+            notifyUser(category=category,amount=float(money - maxBudget)) # give an alert text
             isAlert=True # there is alert!
+        if(money == maxBudget and maxBudget != 0):
+            isAlert = True
+            print("You are at the limit of",category,"category.\n")
     if(isAlert == False): #checking if there are any alerts
         print("No category was found for which you exceeded the limit.\n")
 
@@ -376,16 +389,23 @@ def mainCycle(): # MAIN PROGRAM CYCLE
     #making splitted lists global too to change their values globally
     global splittedBudget
     global splittedExpenses
-    expenses = getExpenses() #getting the expenses from expenses.txt
-    budgets = getBudgets() # getting the budgets from budget.txt
-    waitForInput(True) # giving it true to avoid input
-    splittedExpenses = splitVariables(expenses)
-    splittedBudget = splitVariables(budgets)
-    getCategories()
-    setupDicts()
-    setBudgetDict() # sets the values to the dictionary
-    calculateMoney() # calculating the money for each category
-    
+    while True:
+        try:
+            expenses = getExpenses() #getting the expenses from expenses.txt
+            budgets = getBudgets() # getting the budgets from budget.txt
+            expenses = checkWhitespaces(expenses)
+            budgets = checkWhitespaces(budgets)
+            waitForInput(True) # giving it true to avoid input
+            splittedExpenses = splitVariables(expenses)
+            splittedBudget = splitVariables(budgets)
+            getCategories()
+            setupDicts()
+            setBudgetDict() # sets the values to the dictionary
+            calculateMoney() # calculating the money for each category
+            break # if all things are ok, program will continue to the other while loop
+        except Exception as e:
+            print("\nThere was an error occured. Error is :",e,"\n")
+            waitForInput(False)
     while True: # using while to make the program a cycle
         try:
             print()
