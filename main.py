@@ -295,7 +295,7 @@ def addCategory() -> None: # this function adds category to CATEGORIES, currentB
                 raise Exception
             CATEGORIES.append(categoryName)
             currentBudget[categoryName] = categoryBudget
-            currentMoney[categoryName] = 0
+            currentMoney[categoryName] = 0.0
 
             saveBudgets()
             print("Category added successfully...")
@@ -316,6 +316,9 @@ def deleteCategory() -> None: # this function deletes the category from CATEGORI
     global splittedExpenses
     global currentBudget
     global currentMoney
+    if(len(CATEGORIES) < 2):
+        print("You are not allowed to delete all categories. Please create a new one first to delete!!!")
+        return
     while True:
             
             print("All categories are : \n")    
@@ -345,7 +348,6 @@ def deleteCategory() -> None: # this function deletes the category from CATEGORI
             saveBudgets()
             print("Successfully deleted the category from the system. All of the expenses in this category is deleted as well.")
             break
-
 
 def deleteExpense() -> None: # this function deletes the selected expense and substracts the amount from currentMoney.
     global currentMoney
